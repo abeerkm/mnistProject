@@ -1,19 +1,12 @@
 pipeline {
   agent any
-
-  environment {
-    REGISTRY_URL = '352708296901.dkr.ecr.eu-west-3.amazonaws.com'
-    ECR_REGION = 'eu-west-3 '
-    K8S_NAMESPACE = 'abeer-namespace'
-    K8S_CLUSTER_NAME = 'devops-alfnar-k8s'
-    K8S_CLUSTER_REGION = 'eu-north-1'
-  }
-
-   stages{
-    stage('MNIST Web Server - build'){
-      when { branch "master" }
+  stages {
+    stage('MNIST Web Server - build') {
+      when {
+        branch 'master'
+      }
       steps {
-          sh '''
+        sh '''
             IMAGE="abeer:0.0.${BUILD_NUMBER}"
             cd webserver
             aws ecr get-login-password --region $ECR_REGION | docker login --username AWS --password-stdin ${REGISTRY_URL}
@@ -24,11 +17,12 @@ pipeline {
       }
     }
 
-    stage('MNIST Web Server - deploy'){
-        when { branch "master" }
-        steps {
-
-            sh '''
+    stage('MNIST Web Server - deploy') {
+      when {
+        branch 'master'
+      }
+      steps {
+        sh '''
             cd infra/k8s
             IMG_NAME=mnist-webserver:0.0.${BUILD_NUMBER}
 
@@ -43,14 +37,15 @@ pipeline {
             # apply to your namespace
             kubectl apply -f mnist-webserver.yaml -n $K8S_NAMESPACE
             '''
-        }
+      }
     }
 
-
-    stage('MNIST Predictor - build'){
-        when { branch "master" }
-        steps {
-            sh '''
+    stage('MNIST Predictor - build') {
+      when {
+        branch 'master'
+      }
+      steps {
+        sh '''
             IMAGE="abeer:0.0.${BUILD_NUMBER}"
             cd ml_model
             aws ecr get-login-password --region $ECR_REGION | docker login --username AWS --password-stdin ${REGISTRY_URL}
@@ -58,13 +53,15 @@ pipeline {
             docker tag ${IMAGE} ${REGISTRY_URL}/${IMAGE}
             docker push ${REGISTRY_URL}/${IMAGE}
             '''
-        }
+      }
     }
 
-    stage('MNIST Predictor - deploy'){
-        when { branch "master" }
-        steps {
-            sh '''
+    stage('MNIST Predictor - deploy') {
+      when {
+        branch 'master'
+      }
+      steps {
+        sh '''
             cd infra/k8s
             IMG_NAME=mnist-predictor:0.0.${BUILD_NUMBER}
 
@@ -79,9 +76,15 @@ pipeline {
             # apply to your namespace
             kubectl apply -f mnist-predictor.yaml -n $K8S_NAMESPACE
             '''
-        }
+      }
     }
+
+  }
+  environment {
+    REGISTRY_URL = '352708296901.dkr.ecr.eu-west-3.amazonaws.com'
+    ECR_REGION = 'eu-west-3 '
+    K8S_NAMESPACE = 'abeer-namespace'
+    K8S_CLUSTER_NAME = 'devops-alfnar-k8s'
+    K8S_CLUSTER_REGION = 'eu-north-1'
   }
 }
-
-
