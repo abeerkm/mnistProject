@@ -20,6 +20,7 @@ pipeline {
             docker tag ${IMAGE} ${REGISTRY_URL}/${IMAGE}
             docker push ${REGISTRY_URL}/${IMAGE}
             '''
+
       }
     }
     stage('MNIST Web Server - deploy'){
