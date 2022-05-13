@@ -81,7 +81,6 @@ pipeline {
     }
       stages {
 
-
     stage('Fantastic ascii  - build'){
         when { branch "master" }
         steps {
